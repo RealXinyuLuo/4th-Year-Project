@@ -6,16 +6,15 @@ function [quant,quantnoise,levels,codebook]=uniformquantization(signal,bits)
 % quant: quantized signal
 % quantnoise: quantisation noise 
 %% Defining variables 
+
 maximum=max(signal);                % Maximum value 
 minimum=min(signal);  
 q=(maximum-minimum)/(2^bits);       % Quantization step-size 
-quant = zeros(length(signal),1);    % Pre-allocating memory space
+quant = zeros(1,length(signal));    % Pre-allocating memory space
 %% Performing quantization
 for i =1: length(signal) 
     if round(signal(i)*2^(bits-1))/(2^(bits-1)) == 0
         quant(i)= round(signal(i)*2^(bits-1))/(2^(bits-1));
-%     elseif round(signal(i)*2^(bits-1))/(2^(bits-1)) == 1
-%         quant(i)=1;
     else
         quant(i)= round(signal(i)*2^(bits-1))/(2^(bits-1))-sign(signal(i))*q/2;
     end
@@ -25,12 +24,4 @@ codebook = unique(quant);  % Capture the unique values in quant
 levels = length(codebook); % Calculate the num of unique levels 
 %% Calculating MS error 
 quantnoise = mean((signal-quant).^2);      
-%% Graph
-% figure; 
-% plot(signal);
-% hold on 
-% plot(quant,'.');
-% 
-% axis tight; grid on;legend('original','quantized');
-% fprintf('\n Error between original and quantized = %g\n\n',quantnoise)
 end  
