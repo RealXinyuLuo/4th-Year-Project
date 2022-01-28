@@ -1,6 +1,14 @@
 19 Jan, 2022:
-  First log. 
+  Log 1.
   Noticed the ramp signal generator is not functioning as intented. Will fix later. 
   Currently developing version 2.4 of the code. 
   Meeting with Wes:
       Integrate current code to Justin's code. 
+
+
+28 Jan, 2022:
+  Log 2.
+  Have not fixed the ramp funtion. Low priority.
+  Started rewriting parts of Justin's neural network code for readability.
+  Added comments to Justin's original code.
+  
