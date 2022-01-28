@@ -6,9 +6,8 @@ classdef Wavelet2ReconstructionRegressionLayer < nnet.layer.RegressionLayer
     methods
     %% Constructor
         function layer = Wavelet2ReconstructionRegressionLayer(name)
-            % layer = maeRegressionLayer(name) creates a
-            % mean-absolute-error regression layer and specifies the layer
-            % name.
+            % layer = Wavelet2ReconstructionRegressionLayer(name) creates an
+            % output layer for 2-coefficient wavelet reconstruction learning
 		    
             % Set layer name.
             layer.Name = name;
