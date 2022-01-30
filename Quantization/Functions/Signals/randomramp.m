@@ -1,4 +1,4 @@
-function signal = randomramp(signal_length)  %NOT WORKING
+function signal = randomramp(signal_length) 
 %Generates a ramp signal
 %   signal_length: the length of the sine wave to be generated
 
