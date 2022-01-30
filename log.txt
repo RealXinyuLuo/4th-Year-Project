@@ -12,3 +12,6 @@
   Started rewriting parts of Justin's neural network code for readability.
   Added comments to Justin's original code.
   
+30 Jan, 2022:
+  Log 3.
+  randomramp() function now working as intended 
