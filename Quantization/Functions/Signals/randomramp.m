@@ -9,10 +9,14 @@ ramppoint = round(rand*signal_length);  % the signal length the ramp starts
 increment = 2*pi/(signal_length-ramppoint);         % step size 
 
 
-%t = [ramptime:increment:2*pi-increment];
-
-for t =ramppoint:signal_length
-    signal(t) = signal(t-1) + increment;
+for i = ramppoint:signal_length
+    if i == 1
+        signal(i) = 0 + increment;      % Added to avoid indexing error
+    elseif i > 1
+        signal(i) = signal(i-1) + increment;
+    else
+        signal(i) = 0;                  % Added to avoid indexing error
+    end
 end 
 
 signal = signal';
