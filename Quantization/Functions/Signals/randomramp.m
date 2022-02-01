@@ -15,7 +15,7 @@ for i = ramppoint:signal_length
     elseif i > 1
         signal(i) = signal(i-1) + increment;
     else
-        signal(i) = 0;                  % Added to avoid indexing error
+        % Do nothing                    % Added to avoid indexing error
     end
 end 
 
