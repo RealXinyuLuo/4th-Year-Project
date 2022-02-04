@@ -1,48 +1,53 @@
-training_samples = 12800;
+samples_number = 12800;     % The number of samples in the training set 
 sample_length = 32;
+SNR = 30;     
 filternumber = 2; %2 for 2 coefficient network, 4 for 4 coefficient network
+bits = 3;
 
-%Generating Training data by adding noise to ground truth 
-X = cell(training_samples,1);
-s = size(X);
-for k = 1 : s(1) % the number of columns in X
-a = mixedimages(1, sample_length);
-a = normalize(a,'range');
-a = awgn(a,100);
-a = normalize(a,'range');   % to make sure that all data and noise are [0,1]
-X{k} = a;
+%%  Generating Target Training data 
+target_signals = cell(samples_number,1);
+quantized_signals = cell(samples_number,1);
+
+
+%images = single_type_images(training_samples, sample_length,SNR,type)
+images = mixedimages(12800, sample_length,SNR);
+
+%% Quantization
+
+for i = 1 : samples_number % the number of columns in training data 
+    target_signals{i} = images(:,i); % Target/ ground truth 
+    [quant,quantnoise] = uniformquantization(images(:,i),bits);
+    quantized_signals{i} = quant';       % dimention switch to fit my code to Justin's code
 end
 
-setGlobalImage(X); %Need to set training data as global to retrieve inside 
-                   %deep learning pipeline
+setGlobalImage(quantized_signals); % Set training_et as global to be retrieved inside 
+                              % deep learning pipeline
 
-% Generating dummy ground truth (As training data is the ground truth
-dummyY = cell(training_samples,1);   % work-around to keep the program happy
-s = size(dummyY);
-
-for k = 1:s(1)
+%% Generating dummy ground truth (As training data is the ground truth
+dummyY = cell(samples_number,1);   % work-around to keep the program happy
+Yrow = size(dummyY,1);
+ 
+for i = 1:Yrow
     a = zeros(filternumber*2,1);  % so that dummyY has the same dimention as output layer 
                                   % we don't need it in this case 
-    dummyY{k} = a;
+    dummyY{i} = a;                % filling dummyY with empty elements
 end
 
-% Defining layers
+%% Defining layers
 if filternumber == 2
     layers = [
-    sequenceInputLayer([sample_length])  %
+    sequenceInputLayer(sample_length)  %
     fullyConnectedLayer(10)
     reluLayer     % ML stuff, read. 
     fullyConnectedLayer(10)
     reluLayer
     fullyConnectedLayer(filternumber*2)    %second last layer has to have the same dimention as the output layer 
     eluLayer      % ML stuff, read
-    Wavelet2ReconstructionRegressionLayer()];
-
-%   Wavelet2EntropyRegressionLayer()];
-
+    Wavelet2ReconstructionRegressionLayer('Wavelet2')];
+ 
 else
     layers = [
-    sequenceInputLayer([sample_length])
+    sequenceInputLayer(sample_length)
     fullyConnectedLayer(32)
     reluLayer
     fullyConnectedLayer(10)
@@ -51,12 +56,15 @@ else
     reluLayer
     fullyConnectedLayer(filternumber*2)
     eluLayer
-    Wavelet4ReconstructionRegressionLayer()];
+    Wavelet4ReconstructionRegressionLayer('Wavelet4')];
 end
 
-% Defining training options
+%% Defining training options
 options = trainingOptions('sgdm','InitialLearnRate',0.03,'LearnRateSchedule','piecewise','LearnRateDropPeriod',1,'LearnRateDropFactor',0.2,'Momentum',0.9,'GradientThreshold',1,'L2Regularization',0.1,'MaxEpochs',2,'plots','training-progress');
 
 % main 
-net = trainNetwork(X,dummyY,layers,options);
+net = trainNetwork(quantized_signals,dummyY,layers,options);
+
+
+
 
