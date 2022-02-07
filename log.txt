@@ -15,3 +15,14 @@
 30 Jan, 2022:
   Log 3.
   randomramp() function now working as intended 
+  
+7 Feb, 2022:
+  Log4.
+  mixedimages() from Justin's code replaced.
+  Quantization now works with neural network. 
+  Meeting with Justin tonight to discuss the math of his cost functions. 
+  Trying to pass in quantization level as a feature. 
+  My laptop is getting fixed in London tomorrow, everything will now be copied into my hard drive and done on department computers.
+  
+  
+
