@@ -21,3 +21,9 @@ Neural network is fixed.
 //Xinyu Luo
 Brought in 2D quantization.
 Huffman encoding now supports datapoints of more than 500.
+
+//Version 2.4
+//7 Feb, 2022
+//Xinyu Luo
+Quantization now works together with neural network. 
+
