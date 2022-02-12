@@ -66,7 +66,11 @@ end
 %%  Defining training options
 options = trainingOptions('sgdm','InitialLearnRate',0.03,'LearnRateSchedule','piecewise','MiniBatchSize',64,'LearnRateDropPeriod',1,'LearnRateDropFactor',0.2,'Momentum',0.9,'GradientThreshold',1,'L2Regularization',0.1,'MaxEpochs',2,'plots','training-progress');
 
+%%  Defining feature vector 
+feature = target_signals;
+%%  Defining response vector
+responses = dummyY;
 %%  main 
-net = trainNetwork(target_signals,dummyY,layers,options);
+net = trainNetwork(feature,responses,layers,options);
 
 
