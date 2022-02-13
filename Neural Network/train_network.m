@@ -6,7 +6,7 @@ SNR = 30;
 bits = 3;
 
 %%  Dependent variables
-nn_input_length = sample_length;
+nn_input_length = sample_length+1;
 
 
 %%  Generating data storage
@@ -29,7 +29,7 @@ for i = 1 : training_samples           % the number of columns in training data
     target_samples{i} = images(:,i);   % Target/ ground truth
 
     feature_vector = images(:,i);
-    %feature_vector(end) = bits;
+    feature_vector(end+1) = bits;
 
     feature_vectors{i} = feature_vector;
     
