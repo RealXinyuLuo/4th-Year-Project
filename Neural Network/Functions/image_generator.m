@@ -18,12 +18,14 @@ function images = image_generator(sample_number,sample_length,SNR,type,isSNRunif
         images = mixedimages(sample_number, sample_length,SNR);
         fprintf('Mixed image types and SNR of "%d" are generated\n',SNR);
     elseif ~isSNRuniform && issingletype
+        % if single type image of random SNR values
         for i = 1:sample_number
             SNR = randi([20,80]);  %random SNR values between 20db and 80db
             images(:,i)=single_type_images(1, sample_length,SNR,type);
         end
         fprintf('Images of type "%s" and randomized SNR values are generated\n',type);
     else
+        % if mixed image types of random SNR values
         for i = 1:sample_number
             SNR = randi([20,80]);  %random SNR values between 20db and 80db
             images(:,i)=mixedimages(1, sample_length,SNR);
