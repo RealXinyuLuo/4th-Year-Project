@@ -1,117 +1,104 @@
 classdef Wavelet2ReconstructionRegressionLayer < nnet.layer.RegressionLayer
-    properties
-        T = getGlobalImage; 
+    properties 
+
     end
 
     methods
-    %% Constructor
-        function layer = Wavelet2ReconstructionRegressionLayer(name)
-            % layer = Wavelet2ReconstructionRegressionLayer(name) creates an
-            % output layer for 2-coefficient wavelet reconstruction learning
-		    
+        function layer = TestRegressionLayer(name)
+            % layer = maeRegressionLayer(name) creates a
+            % mean-absolute-error regression layer and specifies the layer
+            % name.
+			
             % Set layer name.
             layer.Name = name;
-    
+
             % Set layer description.
             layer.Description = 'Output layer for 2 coefficient wavelet reconstruction learning';
+
+            layer.T = getGlobalImage;
         end
-    %% Forward Loss    
-        function loss = forwardLoss(layer,Y,T)            
-            % Return the loss between the predictions Y and the training
-            % targets T.
-            %
-            % Inputs:
-            %         layer - Output layer
-            %         Y     – Predictions made by network
-            %         T     – Training targets
-            %
-            % Output:
-            %        loss  - Loss between Y and T 
+        
+        function loss = forwardLoss(layer, Y, T)
+            % Y: read doc 
+            % T: ground truth image 
       %T updates with a new column after each sample in the minibatch,
       %So we need to make sure we are using the latest column
-    
-            Y = double(Y);
-            T = getGlobalImage;  % Accessing input image X 
-            minibatch_size = size(Y,2);  %column            
+            T = double(T);
+            Y = double(Y);     % 4*k
+            
+
+            Yrow = size(Y,1);
+            Ycol = size(Y,2);
+
+            minibatch_size = Ycol; 
+            
             loss = 0;  % loss_val storage
             
             for k = 1 : minibatch_size
-                LoD = Y(1:2,k); % First half of output vector is decomp filter
-                LoR = Y(3:4,k); % Second half is synthesis filter
-    
-                HiD = LoR;
-                HiD(1) = -HiD(1);
-                HiR = LoD;
-                HiR(2) = -HiR(2);
+
+                [LoD,LoR,HiD,HiR] = make2coeffwavelet(Y(:,k));
                 
-                T_k = T(k,:);
-                T_k = cell2mat(T_k);
-    
+                T = getGlobalImage;  %Accessing input image X 
+                
+                T_k = cell2mat(T(k,:));
+
                 [cA,cD] = dwt(T_k,LoD,HiD);
+
                 rec = idwt(cA,cD,LoR,HiR);
                 rec = double(rec);
                  
-                loss_individual = immse(rec,T_k); % Image Mean-Square error
+                loss_individual = immse(rec,T_k); %Image Mean-Square error
                                                   % read forward-loss in
                                                   % deep learning
+
+                
                         
-                loss = loss + loss_individual;   % Adding up loss for the minibatch           
+                loss = loss + loss_individual;   %Adding up loss for the minibatch           
             end
-                  
-            loss = loss / minibatch_size;  % Taking average wrt batch size
-            loss = single(loss);           % Convert to single precision array
-    
+            
+            
+            
+            loss = loss / minibatch_size;
+
+            loss = single(loss);
+
         end
-    %% Backpropagation
-        function dLdY = backwardLoss(layer, Y, T)
-            % (Optional) Backward propagate the derivative of the loss 
-            % function.
-            %
-            % Inputs:
-            %         layer - Output layer
-            %         Y     – Predictions made by network
-            %         T     – Training targets
-            %
-            % Output:
-            %         dLdY  - Derivative of the loss with respect to the 
-            %                 predictions Y        
-    
+
+        function dLdY = backwardLoss(layer, Y, T)  
+
             T = double(T);
             Y = double(Y);
             
-            Yrow = size(Y,2);
-            Ycol = size(Y,1);
-    
-            minibatch_size = Yrow;
-               
-            dLdY = zeros(Ycol,Yrow);
+            Yrow = size(Y,1);
+            Ycol = size(Y,2);
+
+            minibatch_size = Ycol;
             
-            for k = 1 : minibatch_size
+            dLdY = zeros(Yrow,Ycol);
+            
+            for k = 1 : minibatch_size   % for each minibatch 
+
+                [LoD,LoR,HiD,HiR] = make2coeffwavelet(Y(:,k));
                 
-                LoD = Y(1:2,k); % First quarter of output vector is LoD
-                LoR = Y(3:4,k); % Second quarter is LoR etc
-    
-                HiD = LoR;
-                HiD(1) = -HiD(1);
-                HiR = LoD;
-                HiR(2) = -HiR(2);
+                T = getGlobalImage;  
+                T_k = cell2mat(T(k,:));
+
+                [cA,cD] = dwt(T_k,LoD,HiD); % cA and cD latent space elements
                 
-                T = getGlobalImage;
-    
-                T_k = T(k,:);
-                T_k = cell2mat(T_k);
-                [cA,cD] = dwt(T_k,LoD,HiD);
                 rec = idwt(cA,cD,LoR,HiR);
                 rec = double(rec);
-    
+
                 diff = rec - T_k; % Element wise difference between reconstructed signal and original signal             
+                
                 dLdY(1:4,k) = cost2forDL(diff,LoD,LoR,T_k);
                
             end
-        
-            dLdY = dLdY./minibatch_size;   
-            dLdY = single(dLdY);           
-        end             
-    end
+                     
+            dLdY = dLdY./minibatch_size;  % might not be needed 
+            dLdY = single(dLdY);
 
+            
+        end  
+            
+    end
 end
