@@ -9,7 +9,6 @@ Justin Ko's original code.
 //Xinyu Luo
 Basic uniform quantizer
 
-
 //Version 2.2
 //23 Nov, 2021
 //Xinyu Luo 
@@ -27,3 +26,8 @@ Huffman encoding now supports datapoints of more than 500.
 //Xinyu Luo
 Quantization now works together with neural network. 
 
+//Version 2.5
+//13 Feb, 2022
+//Xinyu Luo
+Quantization level now included in the feature vector of the neural network. 
+New image generator function handles randomized SNR values.
