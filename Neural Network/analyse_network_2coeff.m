@@ -1,27 +1,48 @@
-% Analyse
+clear
+clc
 
-
+%%  Independent variables
+training_samples = 12800;
+sample_length = 34;
+filternumber = 2; %2 for 2 coefficient network, 4 for 4 coefficient network
+SNR = 30;
 bits = 3;
+type = 'sine';
+isSNRuniform = true;
+issingletype = false;   
 
-image = mixedimages(1,32,30);
 
+image = image_generator(1,sample_length,SNR,type,isSNRuniform,issingletype);
 image = uniformquantization(image,bits);
 image = image';
 
-act = activations(net,image,'layer');   %DL matlab function. net: trained network, 'layer'. Act is a cell
+%% Data storage
+ds = image;
+ds(end+1) = bits;
+
+act = activations(net,ds,'layer');   %DL matlab function. net: trained network, 'layer'. Act is a cell
 act = cell2mat(act); % data structure converst from cell to matrix                %
 
-LoD = act(1:2); % First half of output vector is decomp filter
-LoR = act(3:4); % Second half is synthesis filter
-
-HiD = LoR;   
-HiD(1) = - HiD(1);    % LoR = [a b]', HiD = [-a, b]' 
-
-HiR = LoD;
-HiR(2) = -HiR(2);    % LoD = [a b]', HiR = [a, -b]'     
+[LoD,LoR,HiD,HiR] = make2coeffwavelet(act);  
 
 [cA,cD] = dwt(image,LoD,HiD);  %Discret wavelet transform, read about dwt first and then ask !
-rec = idwt(cA,cD,LoR,HiR); % reconstructed image. IDWT spits out single. 
+[cA1,cD1] = dwt(image,'bior4.4'); 
+
+%% Quantization 
+bits=8;
+quantized_cA = uniformquantization(cA,bits)';
+quantized_cD = uniformquantization(cD,bits)';
+%% entropy encoding 
+% [cA_code,dict_cA] = huffmanencoder(quantized_cA);
+% [cD_code,dict_cD] = huffmanencoder(quantized_cD);
+%% entropy decoding 
+% reconstructed_cA = huffmandeco(cA_code,dict_cA);
+% reconstructed_cA = reconstructed_cA';
+% reconstructed_cD = huffmandeco(cD_code,dict_cD);
+% reconstructed_cD = reconstructed_cD';
+
+%% reconstruction
+rec = idwt(quantized_cA,quantized_cD,LoR,HiR); % reconstructed image. IDWT spits out single. 
 rec = double(rec); %This is the reconstructed signal, changing data type from single to double 
 
 
@@ -30,5 +51,7 @@ SSIM = ssim(rec,image); %The SSIM looks at how similair the reconstructed signal
 plot(rec)
 hold on
 plot(image)
+
+
 
 
