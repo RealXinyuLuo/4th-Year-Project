@@ -1,29 +1,31 @@
-classdef Wavelet2ReconstructionRegressionLayer < nnet.layer.RegressionLayer
-    properties 
 
+
+classdef Wavelet2ReconstructionRegressionLayer < nnet.layer.RegressionLayer
+    properties
+        T
+        bits
     end
 
     methods
-        function layer = TestRegressionLayer(name)
-            % layer = maeRegressionLayer(name) creates a
-            % mean-absolute-error regression layer and specifies the layer
-            % name.
+        function layer = Wavelet2ReconstructionRegressionLayer(target,bits)
+            % constructor
+            % layer = Wavelet2ReconstructionRegressionLayer(name,bits) 
+            % creates a regression layer and specifies the layer name and 
+            % pass in bits
 			
-            % Set layer name.
-            layer.Name = name;
-
-            % Set layer description.
+            layer.Name = 'Wavelet2ReconstructionRegressionLayer';
             layer.Description = 'Output layer for 2 coefficient wavelet reconstruction learning';
-
-            layer.T = getGlobalImage;
+            layer.T = target;
+            layer.bits = bits;
         end
         
-        function loss = forwardLoss(layer, Y, T)
-            % Y: read doc 
+        function loss = forwardLoss(layer,Y,T)
+            % Y: Neural Network prediction 
             % T: ground truth image 
-      %T updates with a new column after each sample in the minibatch,
-      %So we need to make sure we are using the latest column
-            T = double(T);
+            % Y updates a column after each sample in the minibatch,
+            % So we need to make sure we are using the latest column         
+      
+            T = layer.T;
             Y = double(Y);     % 4*k
             
 
@@ -38,7 +40,6 @@ classdef Wavelet2ReconstructionRegressionLayer < nnet.layer.RegressionLayer
 
                 [LoD,LoR,HiD,HiR] = make2coeffwavelet(Y(:,k));
                 
-                T = getGlobalImage;  %Accessing input image X 
                 
                 T_k = cell2mat(T(k,:));
 
@@ -65,22 +66,20 @@ classdef Wavelet2ReconstructionRegressionLayer < nnet.layer.RegressionLayer
         end
 
         function dLdY = backwardLoss(layer, Y, T)  
-
-            T = double(T);
+            
+            T = layer.T;
             Y = double(Y);
             
             Yrow = size(Y,1);
             Ycol = size(Y,2);
 
-            minibatch_size = Ycol;
-            
+            minibatch_size = Ycol;     
             dLdY = zeros(Yrow,Ycol);
             
             for k = 1 : minibatch_size   % for each minibatch 
 
                 [LoD,LoR,HiD,HiR] = make2coeffwavelet(Y(:,k));
                 
-                T = getGlobalImage;  
                 T_k = cell2mat(T(k,:));
 
                 [cA,cD] = dwt(T_k,LoD,HiD); % cA and cD latent space elements
