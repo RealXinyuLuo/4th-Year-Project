@@ -1,3 +1,4 @@
+
 clear
 clc
 
@@ -21,28 +22,22 @@ feature_vectors = cell(training_samples,1);
 feature_vector = zeros(nn_input_length,1);
 
 %%  Generating image data
-%images = mixedimages(training_samples, sample_length,SNR);
 images = image_generator(training_samples,sample_length,SNR,type,isSNRuniform,issingletype);
 
 %%  Quantization of image data 
-for i = 1 : training_samples           % the number of columns in training data 
-    quantized_samples{i} = uniformquantization(target_samples{i},bits);   % Target/ ground truth 
-end
+% for i = 1 : training_samples           % the number of columns in training data 
+%     quantized_samples{i} = uniformquantization(target_samples{i},bits);   % Target/ ground truth 
+% end
 
 %%  Feature vectors 
 for i = 1 : training_samples           % the number of columns in training data 
     target_samples{i} = images(:,i);   % Target/ ground truth
 
-    feature_vector(1:sample_length) = images(:,i);
-    feature_vector(end) = bits;
+    feature_vector(1:sample_length) = images(:,i);  % start with image data
+    feature_vector(end) = bits;                     % then quantization data
 
-    feature_vectors{i} = feature_vector;
-    
+    feature_vectors{i} = feature_vector;   
 end
-
-%% Defining ground truth 
-setGlobalImage(target_samples);        % Set training_set as global to be retrieved inside 
-                                       % deep learning pipeline
 
 %% Generating dummy response vector
 dummyY = cell(training_samples,1);     % work-around to keep the program happy
@@ -61,12 +56,12 @@ if filternumber == 2
     layers = [
     sequenceInputLayer(nn_input_length)  
     fullyConnectedLayer(10)
-    reluLayer     
+    reluLayer     % ML stuff, read 
     fullyConnectedLayer(10)
     reluLayer
     fullyConnectedLayer(filternumber*2)    %second last layer has to have the same dimention as the output layer 
-    eluLayer      
-    Wavelet2ReconstructionRegressionLayer()];
+    eluLayer      % ML stuff, read
+    Wavelet2ReconstructionRegressionLayer(target_samples,bits)];
 
 %   Wavelet2EntropyRegressionLayer()];
 
