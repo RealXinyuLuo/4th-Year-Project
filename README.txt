@@ -31,3 +31,9 @@ Quantization now works together with neural network.
 //Xinyu Luo
 Quantization level now included in the feature vector of the neural network. 
 New image generator function handles randomized SNR values.
+
+//Version 2.5.1
+//14 Feb, 2022
+//Xinyu Luo
+Quantization level now can be passed into the neural network.
+Eliminated the use of global variable to set ground truth. 
