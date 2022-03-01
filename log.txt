@@ -24,5 +24,8 @@
   Trying to pass in quantization level as a feature. 
   My laptop is getting fixed in London tomorrow, everything will now be copied into my hard drive and done on department computers.
   
+1 Mar, 2022:
+  Log 5.
+  Wes proposed the use of a GAN-like structure to let the two neural networks fight against each other. Working on that. 
   
 
