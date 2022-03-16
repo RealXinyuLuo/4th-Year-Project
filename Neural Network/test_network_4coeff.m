@@ -1,21 +1,57 @@
-a = mixedimages(1,32);
-a = normalize(a,'range');
-a = awgn(a,100);
+%%  Independent variables
+training_samples = 12800;
+sample_length = 128;
+filternumber = 2; %2 for 2 coefficient network, 4 for 4 coefficient network
+SNR = 100;
+bits = 10;
+nn_bits = 5;
+type = 'sine';
+isSNRuniform = true;
+issingletype = false;
+isquantafeature = false;
 
-act = activations(recon_net_4coeff,a,'layer'); %specify network name here
-act = cell2mat(act);
 
-LoD = act(1:4); % First half of output vector is decomp filter
-LoR = act(5:8); % Second half is synthesis filter
+image = image_generator(1,sample_length,SNR,type,isSNRuniform,issingletype);
 
-HiD = LoR;
-HiD(1) = - HiD(1);
-HiD(3) = - HiD(3);
-HiR = LoD;
-HiR(2) = -HiR(2);
-HiR(4) = -HiR(4);
+%% Data storage
+if isquantafeature == true
+    ds = image;
+    ds(end+1) = nn_bits;
+else
+    ds = image;
+end
 
-[cA,cD] = dwt(a,LoD,HiD);
-rec = idwt(cA,cD,LoR,HiR);
-rec = double(rec); %This is the reconstructed signal
-SSIM = ssim(rec,a); %The SSIM looks at how similair the reconstructed signal is to the original. 1 = perfect, 0 = terrible.
+%%
+act = activations(net,ds,'Wavelet4ReconstructionRegressionLayer');   
+act = cell2mat(act); % data structure converst from cell to matrix                %
+
+
+
+
+%% Make Wavelet
+[LoD,LoR,HiD,HiR] = make4coeffwavelet(act);
+
+[cA,cD] = dwt(image,LoD,HiD);  
+
+cA_entropy = entropy(double(cA));
+cD_entropy = entropy(double(cD));
+
+%% Quantization 
+cA_quant = uniformquantization(cA,nn_bits)';
+cD_quant = uniformquantization(cD,nn_bits)';
+
+cA_quant_entropy = entropy(double(cA_quant));
+cD_quant_entropy = entropy(double(cD_quant));
+
+%% Reconstruction
+rec = idwt(cA_quant,cD_quant,LoR,HiR); % reconstructed image. IDWT spits out single. 
+rec = double(rec); %This is the reconstructed signal, changing data type from single to double 
+
+SSIM = ssim(rec,image); %The SSIM looks at how similair the reconstructed signal is to the original. 1 = perfect, 0 = terrible.
+
+plot(image)
+hold on
+plot(rec)
+legend('image','rec')
+
+
