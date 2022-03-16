@@ -5,15 +5,20 @@ clc
 training_samples = 12800;
 sample_length = 128;
 filternumber = 2; %2 for 2 coefficient network, 4 for 4 coefficient network
-SNR = 30;
-nn_bits = 10;      % Quantization of latent space happening inside the network
+SNR = 100;
+nn_bits = 4;      % Quantization of latent space happening inside the network
 type = 'sine';
 isSNRuniform = true;
-issingletype = true;   
+issingletype = false;
+isquantafeature = false;
+
 
 %%  Dependent variables
-nn_input_length = sample_length+1; % neural network input includes image and bits
-
+if isquantafeature == true
+    nn_input_length = sample_length+1; % neural network input includes image and bits
+else
+    nn_input_length = sample_length;
+end
 %%  Generating empty data storage
 target_samples = cell(training_samples,1);
 quantized_samples = cell(training_samples,1);
@@ -21,18 +26,26 @@ feature_vectors = cell(training_samples,1);
 feature_vector = zeros(nn_input_length,1);
 
 %%  Generating image data
-images = image_generator(training_samples,sample_length,SNR,type,isSNRuniform,issingletype);
+images = image_generator(training_samples,sample_length,...
+    SNR,type,isSNRuniform,issingletype);
 
 %%  Feature vectors 
-for i = 1 : training_samples           % the number of columns in training data 
-    target_samples{i} = images(:,i);   % Target/ ground truth
 
-    feature_vector(1:sample_length) = images(:,i); % start with image data
-    feature_vector(end) = nn_bits;                    % then quantization data
+if isquantafeature == true
+    for i = 1 : training_samples           % the number of columns in training data 
+        target_samples{i} = images(:,i);   % Target/ ground truth   
+        feature_vector(1:sample_length) = images(:,i); % start with image data
+        feature_vector(end) = nn_bits;                    % then quantization data   
+        feature_vectors{i} = feature_vector;   
+    end
 
-    feature_vectors{i} = feature_vector;   
+else
+    for i = 1 : training_samples           % the number of columns in training data 
+        target_samples{i} = images(:,i);   % Target/ ground truth
+        feature_vector(1:sample_length) = images(:,i); % image data   
+        feature_vectors{i} = feature_vector;   
+    end
 end
-
 %% Generating dummy response vector
 dummyY = cell(training_samples,1);  % work-around to keep the program happy
 
@@ -49,31 +62,43 @@ responses_size = size(responses,1);
 if filternumber == 2
     layers = [
     sequenceInputLayer(nn_input_length)  
-    fullyConnectedLayer(10,'WeightsInitializer','glorot')
-    reluLayer    
-    fullyConnectedLayer(10,'WeightsInitializer','glorot')
-    reluLayer
-    fullyConnectedLayer(filternumber*2,'WeightsInitializer','glorot')    %second last layer has to have the same dimention as the output layer 
-    eluLayer     
-    Wavelet2ReconstructionRegressionLayer(target_samples,nn_bits)];
+    fullyConnectedLayer(10,'WeightsInitializer','he')
+    reluLayer('Name','relu1')  
+    fullyConnectedLayer(10,'WeightsInitializer','he')
+    reluLayer('Name','relu2')  
+    fullyConnectedLayer(filternumber*2,'WeightsInitializer','he')    %second last layer has to have the same dimention as the output layer 
+    eluLayer('Name','elu1') 
 
-%   Wavelet2EntropyRegressionLayer()];
+    Wavelet2CombinedLayer(target_samples,nn_bits)];
+
+    %Wavelet2ReconstructionRegressionLayer(target_samples,nn_bits)];
+
+    %Wavelet2EntropyRegressionLayer(target_samples,nn_bits)];
 
 else
     layers = [
     sequenceInputLayer(nn_input_length)
-    fullyConnectedLayer(32)
-    reluLayer
-    fullyConnectedLayer(10)
-    reluLayer
-    fullyConnectedLayer(10)
-    reluLayer
-    fullyConnectedLayer(filternumber*2)
-    eluLayer
+    fullyConnectedLayer(32,'WeightsInitializer','he')
+    reluLayer('Name','relu1')  
+    fullyConnectedLayer(10,'WeightsInitializer','he')
+    reluLayer('Name','relu2') 
+    fullyConnectedLayer(10,'WeightsInitializer','he')
+    reluLayer('Name','relu2')
+    fullyConnectedLayer(filternumber*2,'WeightsInitializer','he')
+    eluLayer('Name','elu1')  
     Wavelet4ReconstructionRegressionLayer()];
 end
 
 %%  Defining training options
-options = trainingOptions('sgdm','InitialLearnRate',0.0001,'LearnRateSchedule','piecewise','MiniBatchSize',64,'LearnRateDropPeriod',1,'LearnRateDropFactor',0.2,'Momentum',0.9,'GradientThreshold',1,'L2Regularization',0.1,'MaxEpochs',5,'plots','training-progress');
+options = trainingOptions('sgdm','InitialLearnRate',0.0005,...
+    'LearnRateSchedule','piecewise','MiniBatchSize',64,...
+    'LearnRateDropPeriod',1,'LearnRateDropFactor',0.2,...
+    'Momentum',0.9,'GradientThreshold',1,'L2Regularization',0.1,...
+    'MaxEpochs',2,'plots','training-progress');
+
 %%  Main 
 net = trainNetwork(feature_vectors,responses,layers,options);
+%%  Plotting a layer graph
+%lgraph = layerGraph(layers);
+%figure
+%plot(lgraph)
