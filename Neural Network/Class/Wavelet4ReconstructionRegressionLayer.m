@@ -8,7 +8,7 @@ classdef Wavelet4ReconstructionRegressionLayer < nnet.layer.RegressionLayer
         function layer = Wavelet4ReconstructionRegressionLayer(target,bits)
 
             layer.Name = 'Wavelet4ReconstructionRegressionLayer';
-            layer.Description = 'Output layer for 2 coefficient wavelet entropy reduction learning';
+            layer.Description = 'Output layer for 4 coefficient wavelet reconstruction learning';
             layer.T = target;
             layer.bits = bits;
         end
