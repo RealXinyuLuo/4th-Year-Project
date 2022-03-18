@@ -5,12 +5,16 @@ sample_length = 128;
 filternumber = 2; %2 for 2 coefficient network, 4 for 4 coefficient network
 SNR = 100;
 bits = 10;
-nn_bits = 4;
+nn_bits = 5;
 type = 'sine';
 isSNRuniform = true;
 issingletype = false;
 isquantafeature = false;
 
+%% Dependent variables
+net_saved = load("Trained Networks/2coeff_comb_net_saved.mat");
+net = net_saved.net;
+layer = net.Layers(8).Name;
 
 image = image_generator(1,sample_length,SNR,type,isSNRuniform,issingletype);
 
@@ -22,16 +26,19 @@ else
     ds = image;
 end
 
-act = activations(net,ds,'Wavelet2CombinedLayer');   %DL matlab function. net: trained network, 'layer'. Act is a cell
-act = cell2mat(act); % data structure converst from cell to matrix                %
+%% Activation
+act = activations(net_saved.net,ds,layer);  
+act = cell2mat(act); % data structure converst from cell to matrix               
 
+
+%% Make Wavelet
 [LoD,LoR,HiD,HiR] = make2coeffwavelet(act);
 
 % Save the filter
 filter = [LoD,LoR,HiD,HiR];   
-save('filter_saved.mat','filter','-mat')
+save('Project/2coeff_comb_filter_saved.mat','filter','-mat')
 
-[cA,cD] = dwt(image,LoD,HiD);  % Discret wavelet transform, read about dwt first and then ask !
+[cA,cD] = dwt(image,LoD,HiD);  % Discret wavelet transform
 
 cA_entropy = entropy(double(cA));
 cD_entropy = entropy(double(cD));
