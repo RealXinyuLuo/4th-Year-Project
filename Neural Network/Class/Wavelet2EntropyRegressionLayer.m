@@ -5,9 +5,9 @@ classdef Wavelet2EntropyRegressionLayer < nnet.layer.RegressionLayer
     end
     
     methods
-        function layer = Wavelet2EntropyRegressionLayer(target,bits)
+        function layer = Wavelet2EntropyRegressionLayer(target,bits,name)
 
-            layer.Name = 'Wavelet2EntropyRegressionLayer';
+            layer.Name = name;
             layer.Description = 'Output layer for 2 coefficient wavelet entropy reduction learning';
             layer.T = target;
             layer.bits = bits;
