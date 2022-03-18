@@ -4,14 +4,13 @@ clc
 %%  Independent variables
 training_samples = 12800;
 sample_length = 128;
-filternumber = 2; %2 for 2 coefficient network, 4 for 4 coefficient network
+filternumber = 2; % 2 for 2 coefficient network,4 for 4 coefficient network
 SNR = 100;
-nn_bits = 4;      % Quantization of latent space happening inside the network
+nn_bits = 5;      % Quantization of latent space happening inside the network
 type = 'sine';
 isSNRuniform = true;
 issingletype = false;
 isquantafeature = false;
-
 
 %%  Dependent variables
 if isquantafeature == true
@@ -30,12 +29,14 @@ images = image_generator(training_samples,sample_length,...
     SNR,type,isSNRuniform,issingletype);
 
 %%  Feature vectors 
+% deciding whether to include quantization level as an input
+% controlleg by the 'isquantafeature' flag
 
 if isquantafeature == true
-    for i = 1 : training_samples           % the number of columns in training data 
-        target_samples{i} = images(:,i);   % Target/ ground truth   
+    for i = 1 : training_samples         % the number of columns in training data 
+        target_samples{i} = images(:,i); % Target/ ground truth   
         feature_vector(1:sample_length) = images(:,i); % start with image data
-        feature_vector(end) = nn_bits;                    % then quantization data   
+        feature_vector(end) = nn_bits;                 % then quantization data   
         feature_vectors{i} = feature_vector;   
     end
 
@@ -66,14 +67,12 @@ if filternumber == 2
     reluLayer('Name','relu1')  
     fullyConnectedLayer(10,'WeightsInitializer','he')
     reluLayer('Name','relu2')  
-    fullyConnectedLayer(filternumber*2,'WeightsInitializer','he')    %second last layer has to have the same dimention as the output layer 
+    fullyConnectedLayer(filternumber*2,'WeightsInitializer','he')
     eluLayer('Name','elu1') 
 
-    Wavelet2CombinedLayer(target_samples,nn_bits)];
+    Wavelet2CombinedLayer(target_samples,nn_bits,'2coeffcomb')];
 
-    %Wavelet2ReconstructionRegressionLayer(target_samples,nn_bits)];
-
-    %Wavelet2EntropyRegressionLayer(target_samples,nn_bits)];
+    %Wavelet2ReconstructionRegressionLayer(target_samples,nn_bits,'2coeffrec')];
 
 else
     layers = [
@@ -83,10 +82,10 @@ else
     fullyConnectedLayer(10,'WeightsInitializer','he')
     reluLayer('Name','relu2') 
     fullyConnectedLayer(10,'WeightsInitializer','he')
-    reluLayer('Name','relu2')
+    reluLayer('Name','relu3')
     fullyConnectedLayer(filternumber*2,'WeightsInitializer','he')
     eluLayer('Name','elu1')  
-    Wavelet4ReconstructionRegressionLayer()];
+    Wavelet4ReconstructionRegressionLayer(target_samples,nn_bits,'4coeffrec')];
 end
 
 %%  Defining training options
@@ -98,6 +97,7 @@ options = trainingOptions('sgdm','InitialLearnRate',0.0005,...
 
 %%  Main 
 net = trainNetwork(feature_vectors,responses,layers,options);
+save('Project/net_saved.mat','net','-mat')
 %%  Plotting a layer graph
 %lgraph = layerGraph(layers);
 %figure
