@@ -26,7 +26,7 @@
   Noticed the ramp signal generator is not functioning as intented. Will fix later. 
   Currently developing version 2.4 of the code. 
   Meeting with Wes:
-      Integrate current code to Justin's code. 
+  Integrate current code to Justin's neural network code. 
 
 
 28 Jan, 2022:
