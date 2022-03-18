@@ -5,9 +5,9 @@ classdef Wavelet4ReconstructionRegressionLayer < nnet.layer.RegressionLayer
     end
     
     methods
-        function layer = Wavelet4ReconstructionRegressionLayer(target,bits)
+        function layer = Wavelet4ReconstructionRegressionLayer(target,bits,name)
 
-            layer.Name = 'Wavelet4ReconstructionRegressionLayer';
+            layer.Name = name;
             layer.Description = 'Output layer for 4 coefficient wavelet reconstruction learning';
             layer.T = target;
             layer.bits = bits;
