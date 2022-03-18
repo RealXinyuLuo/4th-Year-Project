@@ -1,5 +1,28 @@
-19 Jan, 2022:
+17 Oct, 2021
   Log 1.
+  Received Justin Ko's original code. 
+
+12 Nov,2021
+  Log 2.
+  Basic uniform quantizer
+
+23 Nov, 2021 
+  Log 3.
+  Huffman encoding is brought online. 
+  Neural network is fixed.
+  
+30 Nov, 2021
+  Log 4.
+  Huffman encoding not workng as expected. Cause to be investigated. 
+
+12 Jan, 2022
+  Log 5.
+  Brought in 2D quantization.
+  Huffman encoding was not working due to compatibility issue with unique() function.
+  Huffman encoding now supports datapoints of more than 500.
+
+19 Jan, 2022:
+  Log 6.
   Noticed the ramp signal generator is not functioning as intented. Will fix later. 
   Currently developing version 2.4 of the code. 
   Meeting with Wes:
@@ -7,25 +30,56 @@
 
 
 28 Jan, 2022:
-  Log 2.
+  Log 7.
   Have not fixed the ramp funtion. Low priority.
   Started rewriting parts of Justin's neural network code for readability.
   Added comments to Justin's original code.
   
 30 Jan, 2022:
-  Log 3.
+  Log 8.
   randomramp() function now working as intended 
   
 7 Feb, 2022:
-  Log4.
+  Log 9.
   mixedimages() from Justin's code replaced.
   Quantization now works with neural network. 
   Meeting with Justin tonight to discuss the math of his cost functions. 
   Trying to pass in quantization level as a feature. 
   My laptop is getting fixed in London tomorrow, everything will now be copied into my hard drive and done on department computers.
-  
-1 Mar, 2022:
-  Log 5.
+ 
+ 
+13 Feb, 2022
+  Log 20.
+  Quantization level now included in the feature vector of the neural network. 
+  New image generator function handles randomized SNR values.
+
+
+14 Feb, 2022
+  Log 11.
+  Eliminated the use of global variable to set ground truth.
+ 
+1 Mar, 2022
+  Log 12.
   Wes proposed the use of a GAN-like structure to let the two neural networks fight against each other. Working on that. 
   
+6 Mar, 2022
+  Log 13.
+  Tested out a sample GAN code from the internet. 
+  GAN is not suitable for this project as it has both regression and classification. 
+  Matlab Deep-Learning Toolbox also has a completely different implementation for two neural networks interacting. 
+  Focus on changing the cost function itself. 
 
+10 Mar, 2022
+  Log 14.
+  Combined an approximation of entropy and reconstruction. 
+  Quantization taken out of feature. 
+  
+16 Mar, 2022
+  Log 15.
+  Rewrote Justin's code for 4-coefficient case in my style. 
+  Tested combined layer against a haar wavelet. Got a strking resemblance in one case.
+  
+18 Mar, 2022
+  Log 16.
+  Streamlined testing. 
+  Trained networks are now automatically stored in a variable. 
