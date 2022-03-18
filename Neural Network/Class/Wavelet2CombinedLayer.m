@@ -5,13 +5,13 @@ classdef Wavelet2CombinedLayer < nnet.layer.RegressionLayer
     end
 
     methods
-        function layer = Wavelet2CombinedLayer(target,nn_bits)
+        function layer = Wavelet2CombinedLayer(target,nn_bits,name)
             % constructor
             % layer = Wavelet2ReconstructionRegressionLayer(name,bits) 
             % creates a regression layer and specifies the layer name and 
             % pass in bits
 			
-            layer.Name = 'Wavelet2CombinedLayer';
+            layer.Name = name;
             layer.Description = 'Output layer for 2 coefficient wavelet reconstruction learning';
             layer.T = target;
             layer.bits = nn_bits;
