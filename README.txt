@@ -37,3 +37,12 @@ New image generator function handles randomized SNR values.
 //Xinyu Luo
 Quantization level now can be passed into the neural network.
 Eliminated the use of global variable to set ground truth. 
+
+
+//Version 2.6
+//18 Feb, 2022
+//Xinyu Luo
+Combined an approximation of entropy and reconstruction. 
+Quantization taken out of feature. 
+Streamlined testing. 
+Trained networks are now automatically stored in a variable. 
