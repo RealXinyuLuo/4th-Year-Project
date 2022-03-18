@@ -12,7 +12,9 @@ wavelet = 'haar';
 %% Load filter
 load("2coeff_comb_filter_saved.mat");
 LoD = filter(:,1);
+LoR = filter(:,2);
 HiD = filter(:,3);
+HiR = filter(:,4);
 
 %% 2D Discrete Wavelet Transform 
 [cA,cD] = dwt(signal,LoD,HiD);
